@@ -1,4 +1,6 @@
-from model.funcionario import Funcionario
+from model.funcionario import Funcionario as modelFuncionario
+from controller.validacoes import validaCpf, validaNome, validaEmail
+
 class Funcionario(object):
     '''
     classdocs
@@ -14,44 +16,31 @@ class Funcionario(object):
         self.email = email
         self.senha = senha
         self.flagGerente = flagGerente
+        self.mFuncionario = modelFuncionario()
         
     def validaFuncionario(self):
-        self.validaCpf(self.cpf)
-        self.validaNome(self.nome)
-        self.validaEmail(self.email)
-        self.validaSenha(self.senha)
+        if validaCpf(self.cpf) == False:
+            return False
+        elif validaNome(self.nome) == False:
+            return False
+        elif validaEmail(self.email) == False:
+            return False
+        elif self.validaSenha(self.senha) == False:
+            return False
         
-    def validaCargo(self, flagGerente):
-        #verifica se é um gerente
-        pass
-            
-    def validaNome(self):
-        if (self.nome == ""):
-            print("Nome em branco!")
-        elif (len(self.nome) > 20):
-            print("Nome possui mais de 20 caracteres!")
-            
-    def validaEmail(self):
-        if (self.email == ""):
-            print("E-Mail em branco!")
-        elif (len(self.email) > 30):
-            print("E-Mail possui mais de 30 caracteres!")
-    
-    def validaCpf(self):
-        if (self.cpf == ""):
-            print("CPF em branco!")
-        elif (len(self.cpf) > 11):
-            print("CPF possui mais de 11 digitos!")
-            
+    def validaCargo(self):
+        return self.mFuncionario.verificaGerente(self.cpf)
+         
     def validaSenha(self):
         if (self.senha == ""):
             print("Senha em branco!")
+            return False
         elif (len(self.senha) > 50):
             print("Senha possui mais de 50 caracteres!")
+            return False
             
     def operacaoFuncionario(self, operacao):
-        mFuncionario = Funcionario(self)
-        mFuncionario.procIADFuncionario(operacao)
-    
-             
-        
+        self.mFuncionario.procIADFuncionario(self, operacao)
+
+    def listaFuncionarios(self):
+        self.mFuncionario.retornaFuncionarios()

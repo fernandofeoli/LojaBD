@@ -1,5 +1,7 @@
 import controller.funcionario as func
-from controller.vendedor import Vendedor
+import controller.vendedor as vend
+from model.gerente import  Gerente as modelGerente
+
 class Gerente(func.Funcionario):
     '''
     classdocs
@@ -11,21 +13,25 @@ class Gerente(func.Funcionario):
         '''
         Constructor
         '''
-        
-    def novoGerente(self,flagGerente, operacao):
-        if self.validaCargo(flagGerente) == True:
+        self.mGerente = modelGerente()
+    def novoGerente(self, cpfGerente, operacao):
+        if self.validaCargo(cpfGerente) == True:
             self.validaFuncionario(self.cpf, self.nome, self.email, self.senha)
-            self.operacaoFuncionario(operacao)
+            self.procIADFuncionario(self, operacao)
         else:
             print("Você não tem permissão para efetuar essa operação!")
+            return False
             
-    def criarFuncionario(self, cpf, nome, email, senha, flagGerente, operacao):
+    def criarFuncionario(self, cpf, nome, email, senha, flagGerente, operacao, cpfGerente=""):
         if flagGerente == True:
             gerente = Gerente(cpf, nome, email, senha, flagGerente)
-            gerente.novoGerente(self.flagGerente, operacao)
+            gerente.novoGerente(self.cpf, operacao)
         else:
-            vendedor = Vendedor(cpf, nome, email, senha, flagGerente)
-            vendedor.novoVendedor(self.flagGerente, operacao)
-             
+            vendedor = vend.Vendedor(cpf, nome, email, senha, flagGerente, cpfGerente)
+            vendedor.novoVendedor(self.cpf, operacao)
+    
+    def listaGerentes(self):
+        self.mGerente.retornaGerentes()
         
-        
+    def listaSupervisionados(self):
+        self.mGerente.verificaSupervisionados()

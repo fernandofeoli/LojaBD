@@ -24,5 +24,67 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- TESTANDO A FUNÇÃO
-SELECT verifica_meta_vendedor(12304136792,7,2019)
+CREATE OR REPLACE FUNCTION insere_venda (IN cpf_funcionario BIGINT, IN cpf_cliente BIGINT, IN data_venda DATE, IN total INTEGER)
+	RETURNS INTEGER AS $$
+DECLARE
+	lastIDsaida INTEGER;
+	newIDsaida INTEGER;
+BEGIN 
+	SELECT max(id_saida) FROM venda INTO lastIDsaida;
+	newIDsaida := lastIDsaida +1;
+	INSERT INTO venda VALUES (newIDsaida,cpf_funcionario,cpf_cliente,data_venda,total);
+	RETURN newIDsaida;
+END; 
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION insere_compra (IN cnpj_fornecedor BIGINT, IN data_compra DATE, IN total INTEGER)
+	RETURNS INTEGER AS $$
+DECLARE
+	lastIdEntrada INTEGER;
+	newIdEntrada INTEGER;
+BEGIN 
+	SELECT max(id_entrada) FROM compra_entrada INTO lastIdEntrada;
+	newIdEntrada := lastIdEntrada +1;
+	INSERT INTO compra_entrada VALUES (newIdEntrada,cnpj_fornecedor,data_compra,total);
+	RETURN newIdEntrada;
+END; 
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION verifica_supervisor(IN cpf_vendedor BIGINT)
+	RETURNS VARCHAR(50) AS $$
+DECLARE 
+	cpf_supervisor BIGINT;
+	nome_supervisor VARCHAR(20);
+	supervisor VARCHAR(30);
+BEGIN
+	SELECT cpf_gerente INTO cpf_supervisor
+	FROM vendedor 
+	WHERE cpf = cpf_vendedor;
+	
+	IF cpf_supervisor = NULL THEN 
+		RAISE EXCEPTION 'Não foi encontrado um supervisor para o vendedor em questão!';
+	ELSE
+		SELECT nome INTO nome_supervisor
+		FROM funcionario 
+		WHERE cpf = cpf_supervisor;
+	END IF;
+		
+	supervisor := CONCAT(CAST(cpf_supervisor AS VARCHAR),' ' ,nome_supervisor);
+	RETURN supervisor;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION verifica_supervisionados(IN p_cpf_gerente BIGINT)
+	RETURNS TABLE(cpf BIGINT, nome VARCHAR(20)) AS $$
+BEGIN
+	RETURN QUERY 
+	SELECT f.cpf, f.nome
+	FROM gerente gt 
+	INNER JOIN vendedor v on gt.cpf = v.cpf_gerente
+	INNER JOIN funcionario f on v.cpf = f.cpf
+	WHERE gt.cpf = p_cpf_gerente;
+	
+	RETURN;
+END;
+$$ LANGUAGE plpgsql;

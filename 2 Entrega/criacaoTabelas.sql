@@ -29,6 +29,7 @@ CREATE TABLE funcionario (
     nome    VARCHAR(20),
     email   VARCHAR(30),
     senha   VARCHAR(50),
+	flagGerente BOOL,
     PRIMARY KEY ( cpf )
 );
 
